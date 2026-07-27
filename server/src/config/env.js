@@ -1,12 +1,16 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const config = {
   env: process.env.NODE_ENV,
   port: process.env.PORT || 3000,
 
   mongoUri: process.env.MONGO_URI,
-  clientUrls: process.env.CLIENT_URL.split(',').map(url => url.trim()),
+  clientUrls: (process.env.CLIENT_URL || '').split(',').map(url => url.trim()),
 
   jwtSecret: process.env.JWT_SECRET,
   adminSecretCode: process.env.ADMIN_SECRET_CODE,
