@@ -29,8 +29,8 @@ const corsOptions = {
     const sanitizedOrigin = origin ? origin.replace(/\/$/, '') : origin;
     const sanitizedAllowedOrigins = allowedOrigins.map(url => url.replace(/\/$/, ''));
 
-    // Allow requests with no origin (like Postman or curl) ONLY in development
-    if (!sanitizedOrigin && config.env !== 'production') {
+    // Allow requests with no origin (like Postman or curl)
+    if (!sanitizedOrigin) {
       return callback(null, true);
     }
 
