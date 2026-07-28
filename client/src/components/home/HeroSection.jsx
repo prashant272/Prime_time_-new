@@ -16,7 +16,7 @@ const SLIDE_INTERVAL_MS = 5000;
 const UPCOMING_EVENTS = [
   {
     slug: 'international-awards',
-    title: 'International Icon Awards 2026',
+    title: 'Global Icon Awards 2026',
     date: '15 Oct 2026',
     venue: 'New Delhi, India',
     image: 'https://placehold.co/600x400/334155/ffffff?text=Icon+Awards',
