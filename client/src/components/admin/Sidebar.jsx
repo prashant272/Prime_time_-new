@@ -8,7 +8,8 @@ import {
   MessageSquare,
   Award,
   Trophy,
-  Tag
+  Tag,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../store/authSlice';
@@ -38,6 +39,7 @@ const Sidebar = () => {
     { name: 'Award Categories', path: '/admin/award-categories', icon: Tag },
     { name: 'Award Events', path: '/admin/award-events', icon: Award },
     { name: 'Blogs', path: '/admin/blogs', icon: FileText },
+    { name: 'Media Gallery', path: '/admin/gallery', icon: ImageIcon },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 

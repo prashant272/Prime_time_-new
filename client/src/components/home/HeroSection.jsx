@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Grid, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/grid';
+import 'swiper/css/pagination';
 
 // ---------------------------------------------------------------------------
 // Data (move to /src/data or fetch from API once backend is wired up)
@@ -11,37 +16,39 @@ const HERO_IMAGES = [
   { src: '/home/hero/hero2.jpeg', alt: 'Audience applauding at awards night' },
 ];
 
-const SLIDE_INTERVAL_MS = 5000;
+const SLIDE_INTERVAL_MS = 3000;
 
 const UPCOMING_EVENTS = [
   {
-    slug: 'international-awards',
-    title: 'Global Icon Awards 2026',
-    date: '15 Oct 2026',
+    slug: 'https://www.primetimemedia.in/awards/global-education-awards/global-education-awards-2026-delhi-edition',
+    title: 'Global Education Awards 2026',
+    date: '4 December 2026',
     venue: 'New Delhi, India',
-    image: 'https://placehold.co/600x400/334155/ffffff?text=Icon+Awards',
+    image: './home/hero/globaleducationdelhi.jpeg',
   },
   {
-    slug: 'global-education-awards',
-    title: 'Global Education Summit',
-    date: '22 Nov 2026',
-    venue: 'Mumbai, India',
-    image: 'https://placehold.co/600x400/1e293b/ffffff?text=Education+Summit',
+    slug: 'https://www.primetimemedia.in/awards/global-education-awards/global-education-awards-2026-dubai-edition',
+    title: 'Global Education Awards 2026',
+    date: '19 October 2026',
+    venue: 'Dubai,UAE',
+    image: './home/hero/globaleducatiodubai.jpeg',
   },
   {
-    slug: 'healthcare-excellence',
-    title: 'Healthcare Excellence Awards',
-    date: '10 Dec 2026',
-    venue: 'Bangalore, India',
-    image: 'https://placehold.co/600x400/0f172a/ffffff?text=Healthcare+Awards',
+    slug: 'https://www.primetimemedia.in/awards/global-healthcare-awards/global-healthcare-awards-2026-delhi-edition',
+    title: 'Global Healthcare Awards 2026',
+    date: '4 October 2026',
+    venue: 'Delhi,India',
+    image: './home/hero/globalhealthcaredelhi.jpeg',
   },
   {
-    slug: 'digital-media',
-    title: 'Digital Media Conclave',
-    date: '05 Jan 2027',
-    venue: 'Dubai, UAE',
-    image: 'https://placehold.co/600x400/475569/ffffff?text=Media+Conclave',
-  },
+    slug: 'https://www.primetimemedia.in/awards/global-healthcare-awards/global-healthcare-awards-2026-washington-dc-edition',
+    title: 'Global Healthcare Awards 2026',
+    date: '12 October 2026',
+    venue: 'Washington DC,USA',
+    image: './home/hero/globalhealthcarewashington.jpeg',
+  }
+
+
 ];
 
 // ---------------------------------------------------------------------------
@@ -92,36 +99,49 @@ const HeroSlider = ({ images, current, onSelect, paused, onPauseChange }) => (
 );
 
 /** Single upcoming-event card used in the right-hand rail. */
-const EventCard = ({ event }) => (
-  <Link
-    to={`/events/${event.slug}`}
-    className="group flex items-center gap-3 rounded-xl border border-white/10 bg-black/60 p-3 shadow-lg backdrop-blur-md transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 sm:gap-4"
-  >
-    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-900 shadow-inner sm:h-24 sm:w-24 md:h-28 md:w-32">
-      <img
-        src={event.image}
-        alt={event.title}
-        loading="lazy"
-        className="h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-100"
-      />
-    </div>
-    <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-      <h4 className="line-clamp-2 text-sm font-bold leading-snug text-white drop-shadow-md transition-colors group-hover:text-sky-400 md:text-base">
-        {event.title}
-      </h4>
-      <div className="flex flex-col gap-1 text-xs font-medium text-white/70 md:text-sm">
-        <div className="flex items-center gap-2">
-          <Calendar size={14} className="shrink-0 text-sky-400" />
-          <span className="truncate">{event.date}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <MapPin size={14} className="shrink-0 text-sky-400" />
-          <span className="truncate">{event.venue}</span>
+const EventCard = ({ event }) => {
+  let linkPath = `/events/${event.slug}`;
+  if (event.slug.startsWith('http')) {
+    try {
+      linkPath = new URL(event.slug).pathname;
+    } catch (e) {
+      linkPath = event.slug;
+    }
+  } else if (event.slug.startsWith('/')) {
+    linkPath = event.slug;
+  }
+
+  return (
+    <Link
+      to={linkPath}
+      className="group flex items-center gap-3 rounded-xl border border-white/10 bg-black/60 p-3 shadow-lg backdrop-blur-md transition-colors hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400 sm:gap-4 h-full"
+    >
+      <div className="w-1/2 shrink-0 overflow-hidden rounded-lg flex items-center justify-center">
+        <img
+          src={event.image}
+          alt={event.title}
+          loading="lazy"
+          className="w-full h-auto object-contain opacity-90 transition-transform duration-500 group-hover:scale-110 group-hover:opacity-100"
+        />
+      </div>
+      <div className="flex min-w-0 w-1/2 flex-col justify-center gap-1.5">
+        <h4 className="line-clamp-2 text-sm font-bold leading-snug text-white drop-shadow-md transition-colors group-hover:text-sky-400 md:text-base">
+          {event.title}
+        </h4>
+        <div className="flex flex-col gap-1 text-xs font-medium text-white/70 md:text-sm">
+          <div className="flex items-center gap-2">
+            <Calendar size={14} className="shrink-0 text-sky-400" />
+            <span className="truncate">{event.date}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <MapPin size={14} className="shrink-0 text-sky-400" />
+            <span className="truncate">{event.venue}</span>
+          </div>
         </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
 
 /** Tabbed video panel: an in-page "Event Highlights" embed + external "Live Events" link. */
 const VideoPanel = ({ activeTab, onTabChange }) => (
@@ -137,8 +157,8 @@ const VideoPanel = ({ activeTab, onTabChange }) => (
         aria-selected={activeTab === 'featured'}
         onClick={() => onTabChange('featured')}
         className={`flex flex-1 items-center justify-center gap-2 border-t-2 px-4 py-3 text-xs font-bold transition-colors sm:flex-none md:px-6 md:text-sm ${activeTab === 'featured'
-            ? 'border-red-500 bg-red-600 text-white'
-            : 'border-transparent bg-black/20 text-white/60 hover:bg-white/5 hover:text-white'
+          ? 'border-red-500 bg-red-600 text-white'
+          : 'border-transparent bg-black/20 text-white/60 hover:bg-white/5 hover:text-white'
           }`}
       >
         {activeTab === 'featured' && (
@@ -226,10 +246,29 @@ const HeroSection = () => {
               Upcoming Events
             </h3>
 
-            <div className="no-scrollbar grid max-h-[42vh] grid-cols-1 gap-3 overflow-y-auto pb-1 pr-1 sm:max-h-[38vh] sm:grid-cols-2 sm:gap-4 lg:max-h-none xl:grid-cols-2 2xl:grid-cols-3">
-              {UPCOMING_EVENTS.map((event) => (
-                <EventCard key={event.slug} event={event} />
-              ))}
+            <div className="w-full">
+              {UPCOMING_EVENTS.length > 0 && (
+                <Swiper
+                  slidesPerView={1}
+                  spaceBetween={12}
+                  grid={{ rows: 2, fill: 'row' }}
+                  watchOverflow={true}
+                  pagination={{ clickable: true, dynamicBullets: true }}
+                  autoplay={{ delay: 3000, disableOnInteraction: false }}
+                  breakpoints={{
+                    640: { slidesPerView: 2, grid: { rows: 1, fill: 'row' }, spaceBetween: 16 },
+                    1024: { slidesPerView: 2, grid: { rows: 2, fill: 'row' }, spaceBetween: 16 },
+                  }}
+                  modules={[Grid, Pagination, Autoplay]}
+                  className="hero-events-swiper w-full min-h-[320px] sm:min-h-[160px] lg:h-[280px] pb-10"
+                >
+                  {UPCOMING_EVENTS.map((event) => (
+                    <SwiperSlide key={event.slug} className="h-full">
+                      <EventCard event={event} />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
             </div>
           </div>
         </div>

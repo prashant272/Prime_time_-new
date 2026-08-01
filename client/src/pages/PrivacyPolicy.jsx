@@ -100,7 +100,7 @@ const PrivacyPolicy = () => {
                 For any queries related to this Policy, correction of any personal information provided by you or for making a complaint about breach of privacy, you may please contact our legal advisors:
               </p>
               <p className="text-lg">
-                <strong>Email:</strong> <a href="mailto:legal@timemedia.in" className="text-sky-600 hover:text-sky-700 transition-colors">legal@timemedia.in</a>
+                <strong>Email:</strong> <a href="mailto:legal@primetimemedia.in" className="text-sky-600 hover:text-sky-700 transition-colors">legal@primetimemedia.in</a>
               </p>
             </div>
 

@@ -6,7 +6,7 @@ export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery(api),
   keepUnusedDataFor: 3600, // Keep cached data for 1 hour when component unmounts
-  tagTypes: ['Blog', 'Comment', 'Nomination', 'Contact', 'AwardCategory', 'AwardEvent'],
+  tagTypes: ['Blog', 'Comment', 'Nomination', 'Contact', 'AwardCategory', 'AwardEvent', 'Gallery'],
   endpoints: (builder) => ({
     // ---- BLOGS ----
     getBlogs: builder.query({
@@ -225,6 +225,30 @@ export const apiSlice = createApi({
         method: 'POST',
       }),
     }),
+    // ---- GALLERY ----
+    getGallery: builder.query({
+      query: () => ({
+        url: '/gallery',
+        method: 'GET',
+      }),
+      providesTags: ['Gallery'],
+    }),
+    updateGallery: builder.mutation({
+      query: (data) => ({
+        url: '/gallery',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Gallery'],
+    }),
+    uploadGalleryPhoto: builder.mutation({
+      query: (formData) => ({
+        url: '/gallery/upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['Gallery'],
+    }),
   }),
 });
 
@@ -261,4 +285,8 @@ export const {
   useLoginMutation,
   useSignupMutation,
   useLogoutMutation,
+
+  useGetGalleryQuery,
+  useUpdateGalleryMutation,
+  useUploadGalleryPhotoMutation,
 } = apiSlice;

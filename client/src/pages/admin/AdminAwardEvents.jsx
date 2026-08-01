@@ -19,10 +19,16 @@ const AdminAwardEvents = () => {
   const categories = catResponse?.data || [];
 
   const { data: eventsResponse, isLoading } = useGetAwardEventsQuery(
-    { category: selectedCategory },
+    { category: selectedCategory, admin: 'true' },
     { skip: !selectedCategory }
   );
-  const events = eventsResponse?.data || [];
+  
+  // Sort events so 'upcoming' status is always at the top
+  const events = (eventsResponse?.data || []).slice().sort((a, b) => {
+    if (a.status === 'upcoming' && b.status !== 'upcoming') return -1;
+    if (a.status !== 'upcoming' && b.status === 'upcoming') return 1;
+    return 0;
+  });
 
   const [createEvent, { isLoading: isCreating }] = useCreateAwardEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateAwardEventMutation();
@@ -35,7 +41,7 @@ const AdminAwardEvents = () => {
   // Form State
   const [formData, setFormData] = useState({
     title: '', year: '', chiefGuest: '', eventDate: '', venue: '',
-    shortDescription: '', narrativeHtml: '', status: 'upcoming', openForNomination: false, order: 0
+    shortDescription: '', narrativeHtml: '', status: 'draft', openForNomination: false, order: 0
   });
 
   const [heroImageFile, setHeroImageFile] = useState(null);
@@ -64,7 +70,7 @@ const AdminAwardEvents = () => {
         venue: ev.venue || '',
         shortDescription: ev.shortDescription || '',
         narrativeHtml: ev.narrativeHtml || '',
-        status: ev.status || 'upcoming',
+        status: ev.status || 'draft',
         openForNomination: ev.openForNomination || false,
         order: ev.order || 0
       });
@@ -75,7 +81,7 @@ const AdminAwardEvents = () => {
       setEditingEvent(null);
       setFormData({
         title: '', year: '', chiefGuest: '', eventDate: '', venue: '',
-        shortDescription: '', narrativeHtml: '', status: 'upcoming', openForNomination: false, order: 0
+        shortDescription: '', narrativeHtml: '', status: 'draft', openForNomination: false, order: 0
       });
       setVideoGalleryInput('');
       setExistingHero(null);
@@ -248,61 +254,65 @@ const AdminAwardEvents = () => {
               </div>
 
               {/* Gallery Images */}
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold text-slate-700">Photo Gallery</label>
+              {formData.status !== 'upcoming' && (
+                <div className="space-y-4">
+                  <label className="block text-sm font-semibold text-slate-700">Photo Gallery</label>
 
-                {existingGallery.length > 0 && (
-                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Current Gallery ({existingGallery.length})</p>
-                    <div className="flex flex-wrap gap-3">
-                      {existingGallery.map((img, i) => (
-                        <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-slate-300 shadow-sm group">
-                          <img src={img.url} alt="Archive" className="w-full h-full object-cover" />
-                          <button type="button" onClick={() => setExistingGallery(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
+                  {existingGallery.length > 0 && (
+                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Current Gallery ({existingGallery.length})</p>
+                      <div className="flex flex-wrap gap-3">
+                        {existingGallery.map((img, i) => (
+                          <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-slate-300 shadow-sm group">
+                            <img src={img.url} alt="Archive" className="w-full h-full object-cover" />
+                            <button type="button" onClick={() => setExistingGallery(prev => prev.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {galleryImageFiles.length > 0 && (
-                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                    <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-3">Selected to Upload ({galleryImageFiles.length})</p>
-                    <div className="flex flex-wrap gap-3">
-                      {Array.from(galleryImageFiles).map((file, i) => (
-                        <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-blue-300 shadow-sm group">
-                          <img src={URL.createObjectURL(file)} alt="Staged" className="w-full h-full object-cover" />
-                          <button type="button" onClick={() => {
-                            const dt = new DataTransfer();
-                            Array.from(galleryImageFiles).filter((_, idx) => idx !== i).forEach(f => dt.items.add(f));
-                            setGalleryImageFiles(dt.files);
-                          }} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ))}
+                  {galleryImageFiles.length > 0 && (
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                      <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-3">Selected to Upload ({galleryImageFiles.length})</p>
+                      <div className="flex flex-wrap gap-3">
+                        {Array.from(galleryImageFiles).map((file, i) => (
+                          <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-blue-300 shadow-sm group">
+                            <img src={URL.createObjectURL(file)} alt="Staged" className="w-full h-full object-cover" />
+                            <button type="button" onClick={() => {
+                              const dt = new DataTransfer();
+                              Array.from(galleryImageFiles).filter((_, idx) => idx !== i).forEach(f => dt.items.add(f));
+                              setGalleryImageFiles(dt.files);
+                            }} className="absolute inset-0 bg-red-600/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                <div className="relative">
-                  <input type="file" id="gallery-upload" multiple accept="image/*" onChange={e => setGalleryImageFiles(e.target.files)} className="hidden" />
-                  <label htmlFor="gallery-upload" className="flex flex-col items-center justify-center w-full py-6 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer text-slate-500 hover:text-blue-600">
-                    <Plus size={24} className="mb-2" />
-                    <span className="text-sm font-medium">Add Photos</span>
-                  </label>
+                  <div className="relative">
+                    <input type="file" id="gallery-upload" multiple accept="image/*" onChange={e => setGalleryImageFiles(e.target.files)} className="hidden" />
+                    <label htmlFor="gallery-upload" className="flex flex-col items-center justify-center w-full py-6 border-2 border-dashed border-slate-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer text-slate-500 hover:text-blue-600">
+                      <Plus size={24} className="mb-2" />
+                      <span className="text-sm font-medium">Add Photos</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Video Links */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2"><Video size={16} /> YouTube Video Links</label>
-              <textarea className={`${inputClass} min-h-[80px] font-mono text-sm`} placeholder="https://youtube.com/watch?v=..., https://youtu.be/..." value={videoGalleryInput} onChange={e => setVideoGalleryInput(e.target.value)} />
-              <p className="text-xs text-slate-500 mt-1">Separate multiple URLs with commas.</p>
-            </div>
+            {formData.status !== 'upcoming' && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5 flex items-center gap-2"><Video size={16} /> YouTube Video Links</label>
+                <textarea className={`${inputClass} min-h-[80px] font-mono text-sm`} placeholder="https://youtube.com/watch?v=..., https://youtu.be/..." value={videoGalleryInput} onChange={e => setVideoGalleryInput(e.target.value)} />
+                <p className="text-xs text-slate-500 mt-1">Separate multiple URLs with commas.</p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

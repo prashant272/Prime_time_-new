@@ -20,6 +20,13 @@ const Navbar = () => {
   const categories = catRes?.data || [];
   const events = evtRes?.data || [];
 
+  const getEventsForCategory = (catId) => {
+    if (catId === 'upcoming-hardcode') {
+      return events.filter(ev => ev.status === 'upcoming');
+    }
+    return events.filter(ev => ev.category?._id === catId && ev.status !== 'upcoming');
+  };
+
   const [activeCategory, setActiveCategory] = useState(null);
 
   // Close mobile menu when route changes
@@ -104,8 +111,8 @@ const Navbar = () => {
                       {/* Nested Events Dropdown */}
                       <div className={`absolute top-0 left-full ml-0 w-72 bg-white shadow-xl rounded-lg overflow-hidden border border-slate-100 transition-all duration-200 z-50 ${activeCategory === cat._id ? 'opacity-100 visible translate-x-0' : 'opacity-0 invisible -translate-x-2'}`}>
                         <div className="py-2 flex flex-col max-h-[60vh] overflow-y-auto custom-scrollbar">
-                          {events.filter(ev => ev.category?._id === cat._id).length > 0 ? (
-                            events.filter(ev => ev.category?._id === cat._id).map(ev => (
+                          {getEventsForCategory(cat._id).length > 0 ? (
+                            getEventsForCategory(cat._id).map(ev => (
                               <Link 
                                 key={ev._id}
                                 to={`/awards/${cat.slug}/${ev.slug}`}

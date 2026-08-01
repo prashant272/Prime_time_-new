@@ -6,6 +6,19 @@ import AwardEvent from '../models/AwardEvent.js';
 export const getAwardCategories = async (req, res) => {
   try {
     const categories = await AwardCategory.find().sort({ order: 1 });
+    
+    // Inject hardcoded Upcoming Award category at the top
+    const upcomingCategory = {
+      _id: 'upcoming-hardcode',
+      name: 'Upcoming Award',
+      slug: 'upcoming-award',
+      isActive: true,
+      order: -999,
+      description: 'Explore all of our upcoming award events across all categories.',
+    };
+    
+    categories.unshift(upcomingCategory);
+
     res.status(200).json({ success: true, data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -56,10 +69,26 @@ export const deleteAwardCategory = async (req, res) => {
 export const getAwardEvents = async (req, res) => {
   try {
     const filter = {};
+    
+    // Hide draft events from public users (only admins can see them)
+    if (req.query.admin !== 'true') {
+      filter.status = { $ne: 'draft' };
+    }
+
     if (req.query.category) {
-      // Find category by slug
-      const category = await AwardCategory.findOne({ slug: req.query.category });
-      if (category) filter.category = category._id;
+      if (req.query.category === 'upcoming-award') {
+        // Special hardcoded category: return ALL upcoming events regardless of their actual DB category
+        filter.status = 'upcoming'; // This safely overrides the $ne: 'draft' above
+      } else {
+        // Find category by slug
+        const category = await AwardCategory.findOne({ slug: req.query.category });
+        if (category) {
+          filter.category = category._id;
+        } else {
+           // If category doesn't exist and wasn't the hardcoded one, return empty
+           return res.status(200).json({ success: true, data: [] });
+        }
+      }
     }
     const events = await AwardEvent.find(filter).populate('category').sort({ order: 1, eventDate: -1 });
     res.status(200).json({ success: true, data: events });

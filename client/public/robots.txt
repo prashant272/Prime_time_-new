@@ -8,4 +8,4 @@ Disallow: /admin/*
 # Disallow access to sensitive API paths if any
 Disallow: /api/
 
-Sitemap: https://timemedia.in/sitemap.xml
+Sitemap: https://www.primetimemedia.in/sitemap.xml
