@@ -34,6 +34,7 @@ const AdminWriteBlog = lazy(() => import('./pages/admin/AdminWriteBlog'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminAwardCategories = lazy(() => import('./pages/admin/AdminAwardCategories'));
 const AdminAwardEvents = lazy(() => import('./pages/admin/AdminAwardEvents'));
+const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
 
 function App() {
   const location = useLocation();
@@ -84,6 +85,7 @@ function App() {
               <Route path="blogs" element={<AdminBlogList />} />
               <Route path="blogs/new" element={<AdminWriteBlog />} />
               <Route path="blogs/:id/edit" element={<AdminWriteBlog />} />
+              <Route path="gallery" element={<AdminGallery />} />
               <Route path="settings" element={<AdminSettings />} />
               {/* Add more nested admin routes here later */}
             </Route>

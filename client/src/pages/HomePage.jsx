@@ -17,6 +17,7 @@ import ClientLogosStrip from '../components/home/ClientLogosStrip';
 import AboutSummary from '../components/home/AboutSummary';
 import ChiefGuestsCarousel from '../components/home/ChiefGuestsCarousel';
 import BrandDivider from '../components/home/BrandDivider';
+import EventGallery from '../components/home/EventGallery';
 import SEO from '../components/common/SEO';
 
 const HomePage = () => {
@@ -64,11 +65,13 @@ const HomePage = () => {
         <SectionWrapper><ServicesMarquee /></SectionWrapper>
         <SectionWrapper><ResearchMethodology /></SectionWrapper>
         <SectionWrapper><SelectionProcess /></SectionWrapper>
+        <SectionWrapper><EventGallery /></SectionWrapper>
         <SectionWrapper><TestimonialSection /></SectionWrapper>
         <SectionWrapper><HomeFaqSection /></SectionWrapper>
         <SectionWrapper><StatsSection /></SectionWrapper>
         <SectionWrapper><LatestNewsSection /></SectionWrapper>
         <SectionWrapper><UpcomingEventsSection /></SectionWrapper>
+
       </PageContainer>
     </main>
   );

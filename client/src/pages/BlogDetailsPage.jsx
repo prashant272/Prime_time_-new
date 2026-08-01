@@ -34,7 +34,7 @@ const BlogDetailsPage = () => {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": blog.title,
-    "image": blog.image ? `https://timemedia.in${blog.image}` : "https://timemedia.in/og-image.jpg",
+    "image": blog.image ? `https://www.primetimemedia.in${blog.image}` : "https://www.primetimemedia.in/og-image.jpg",
     "author": {
       "@type": "Person",
       "name": blog.author || "Prime Time Research Media"
@@ -44,7 +44,7 @@ const BlogDetailsPage = () => {
       "name": "Prime Time Research Media",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://timemedia.in/favicon.svg"
+        "url": "https://www.primetimemedia.in/favicon.svg"
       }
     },
     "datePublished": new Date(blog.createdAt).toISOString()
@@ -55,7 +55,7 @@ const BlogDetailsPage = () => {
       <SEO 
         title={`${blog.title} | Blog`}
         description={blog.excerpt || "Read this insightful article on Prime Time Research Media."}
-        image={blog.image ? `https://timemedia.in${blog.image}` : undefined}
+        image={blog.image ? `https://www.primetimemedia.in${blog.image}` : undefined}
         type="article"
         schema={blogSchema}
       />

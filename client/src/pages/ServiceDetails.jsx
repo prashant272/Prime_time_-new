@@ -56,7 +56,7 @@ export default function ServiceDetails() {
         title={seoData.metaTitle}
         description={seoData.metaDescription}
         keywords={seoData.keywords.join(', ')}
-        image={data.hero && data.hero.image ? `https://timemedia.in${data.hero.image}` : undefined}
+        image={data.hero && data.hero.image ? `https://www.primetimemedia.in${data.hero.image}` : undefined}
         schema={schemas}
       />
       {/* Section 1: Hero */}

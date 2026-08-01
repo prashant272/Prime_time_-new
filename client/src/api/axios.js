@@ -35,10 +35,6 @@ api.interceptors.response.use(
       // Dispatch logout action to clear Redux state and local storage
       store.dispatch(logout());
 
-      // Optionally redirect to login, handled via protected routes in App.jsx usually
-      if (window.location.pathname.startsWith('/admin') && window.location.pathname !== '/admin/login') {
-        window.location.href = '/admin/login';
-      }
     }
 
     // Pass the error down so RTK Query can catch it

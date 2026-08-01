@@ -1,6 +1,6 @@
 import { TOP_LOCATIONS } from "./Location";
 
-const SITE_URL = 'https://timemedia.in';
+const SITE_URL = 'https://www.primetimemedia.in';
 const ORG_NAME = 'Prime Time Research Media';
 
 

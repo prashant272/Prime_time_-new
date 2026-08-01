@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import config from '../../config/env';
 
-const SITE_URL = config?.siteUrl || 'https://timemedia.in';
+const SITE_URL = config?.siteUrl || 'https://www.primetimemedia.in';
 const SITE_NAME = 'Prime Time Research Media';
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 const TWITTER_HANDLE = '@Prime_Time_Medi';

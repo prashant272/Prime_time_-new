@@ -7,15 +7,21 @@ import { Award, ChevronRight, Calendar, MapPin } from 'lucide-react';
 
 const AwardsLanding = () => {
   const { categorySlug } = useParams();
-  
+
   const { data: catResponse, isLoading: catLoading } = useGetAwardCategoriesQuery();
   const categories = catResponse?.data || [];
-  
+
   const { data: evtResponse, isLoading: evtLoading } = useGetAwardEventsQuery(
-    categorySlug ? { category: categorySlug } : {}, 
+    categorySlug ? { category: categorySlug } : {},
     { skip: !categorySlug }
   );
-  const events = evtResponse?.data || [];
+
+  // Sort events so 'upcoming' status is always at the top
+  const events = (evtResponse?.data || []).slice().sort((a, b) => {
+    if (a.status === 'upcoming' && b.status !== 'upcoming') return -1;
+    if (a.status !== 'upcoming' && b.status === 'upcoming') return 1;
+    return 0;
+  });
 
   const currentCat = categories.find(c => c.slug === categorySlug);
 
@@ -36,24 +42,24 @@ const AwardsLanding = () => {
         "name": ev.venue || "TBA",
         "address": ev.venue || "TBA"
       },
-      "image": ev.heroImage?.url ? ev.heroImage.url : currentCat.bannerImage ? `https://timemedia.in${currentCat.bannerImage}` : "https://timemedia.in/og-image.jpg",
+      "image": ev.heroImage?.url ? ev.heroImage.url : currentCat.bannerImage ? `https://www.primetimemedia.in${currentCat.bannerImage}` : "https://www.primetimemedia.in/og-image.jpg",
       "description": `Join the prestigious ${ev.title} hosted by Prime Time Research Media.`,
       "organizer": {
         "@type": "Organization",
         "name": "Prime Time Research Media",
-        "url": "https://timemedia.in"
+        "url": "https://www.primetimemedia.in"
       }
     }));
 
     return (
       <main className="bg-slate-50 min-h-screen py-16">
-        <SEO 
+        <SEO
           title={`${currentCat.name} | Award Summits`}
           description={currentCat.description ? currentCat.description.substring(0, 150) + "..." : "Explore prestigious award summits, conferences, and recognition events hosted by Prime Time Research Media."}
-          image={currentCat.bannerImage ? `https://timemedia.in${currentCat.bannerImage}` : undefined}
+          image={currentCat.bannerImage ? `https://www.primetimemedia.in${currentCat.bannerImage}` : undefined}
           schema={eventSchemas.length > 0 ? eventSchemas : undefined}
         />
-        
+
         <PageContainer>
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 font-display">{currentCat.name}</h1>
@@ -62,8 +68,8 @@ const AwardsLanding = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.length > 0 ? events.map(ev => (
-              <Link 
-                key={ev._id} 
+              <Link
+                key={ev._id}
                 to={`/awards/${categorySlug}/${ev.slug}`}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 group flex flex-col"
               >
@@ -86,12 +92,12 @@ const AwardsLanding = () => {
                   <div className="mt-auto space-y-2">
                     {ev.venue && (
                       <p className="text-slate-500 text-sm flex items-center gap-2">
-                        <MapPin size={16} className="text-[#15b7b9]"/> {ev.venue}
+                        <MapPin size={16} className="text-[#15b7b9]" /> {ev.venue}
                       </p>
                     )}
                     {ev.eventDate && (
                       <p className="text-slate-500 text-sm flex items-center gap-2">
-                        <Calendar size={16} className="text-[#15b7b9]"/> {new Date(ev.eventDate).toLocaleDateString()}
+                        <Calendar size={16} className="text-[#15b7b9]" /> {new Date(ev.eventDate).toLocaleDateString()}
                       </p>
                     )}
                   </div>
@@ -109,11 +115,11 @@ const AwardsLanding = () => {
   // Otherwise, show all categories
   return (
     <main className="bg-slate-50 min-h-screen py-16">
-      <SEO 
+      <SEO
         title="Awards & Recognitions | Prime Time Media"
         description="Celebrating excellence and recognizing pioneers across industries through our prestigious national and international award programs."
       />
-      
+
       <PageContainer>
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 font-display">Awards & Recognitions</h1>
@@ -124,8 +130,8 @@ const AwardsLanding = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {categories.filter(cat => cat.isActive).map(cat => (
-            <Link 
-              key={cat._id} 
+            <Link
+              key={cat._id}
               to={`/awards/${cat.slug}`}
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 group"
             >

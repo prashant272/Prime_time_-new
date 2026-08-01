@@ -75,7 +75,7 @@ const TermsConditions = () => {
             <div className="mt-12">
               <h2 className="text-2xl text-slate-800 font-bold mb-4 border-b pb-2">INDEMNITY</h2>
               <p>
-                The User unilaterally agree to indemnify and hold harmless, without objection, the Company, its officers, directors, employees and agents from and against any claims, actions and/or demands and/or liabilities and/or losses and/or damages whatsoever arising from or resulting from their use of timemedia.in or their breach of the terms .
+                The User unilaterally agree to indemnify and hold harmless, without objection, the Company, its officers, directors, employees and agents from and against any claims, actions and/or demands and/or liabilities and/or losses and/or damages whatsoever arising from or resulting from their use of primetimemedia.in or their breach of the terms .
               </p>
             </div>
 

@@ -96,12 +96,18 @@ const AdminAwardCategories = () => {
                   }
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button onClick={() => handleOpenModal(cat)} className="text-blue-600 hover:text-blue-800 p-2">
-                    <Edit2 size={18} />
-                  </button>
-                  <button onClick={() => handleDelete(cat._id)} className="text-red-600 hover:text-red-800 p-2">
-                    <Trash2 size={18} />
-                  </button>
+                  {cat._id !== 'upcoming-hardcode' ? (
+                    <>
+                      <button onClick={() => handleOpenModal(cat)} className="text-blue-600 hover:text-blue-800 p-2">
+                        <Edit2 size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(cat._id)} className="text-red-600 hover:text-red-800 p-2">
+                        <Trash2 size={18} />
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-slate-400 text-xs italic px-2">System Default</span>
+                  )}
                 </td>
               </tr>
             ))}

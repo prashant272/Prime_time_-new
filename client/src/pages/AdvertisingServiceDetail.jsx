@@ -47,7 +47,7 @@ export default function AdvertisingServiceDetail() {
         title={seoEntry.metaTitle}
         description={seoEntry.metaDescription}
         keywords={seoEntry.keywords}
-        image={`https://timemedia.in${data.image}`}
+        image={`https://www.primetimemedia.in${data.image}`}
         schema={schema}
       />
 
