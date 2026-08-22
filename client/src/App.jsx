@@ -13,6 +13,7 @@ const OurPatronsPage = lazy(() => import('./pages/OurPatronsPage'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
 const ServiceDetails = lazy(() => import('./pages/ServiceDetails'));
 const AdvertisingServiceDetail = lazy(() => import('./pages/AdvertisingServiceDetail'));
+const EventDetails = lazy(() => import('./pages/EventDetails'));
 const BlogPage = lazy(() => import('./pages/BlogPage'));
 const BlogDetailsPage = lazy(() => import('./pages/BlogDetailsPage'));
 const AwardsLanding = lazy(() => import('./pages/AwardsLanding'));
@@ -35,6 +36,7 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminAwardCategories = lazy(() => import('./pages/admin/AdminAwardCategories'));
 const AdminAwardEvents = lazy(() => import('./pages/admin/AdminAwardEvents'));
 const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
+const AdminNominationSettings = lazy(() => import('./pages/admin/AdminNominationSettings'));
 
 function App() {
   const location = useLocation();
@@ -59,6 +61,8 @@ function App() {
             <Route path="/services/:serviceId" element={<ServiceDetails />} />
             <Route path="/advertising-services" element={<Navigate to="/advertising-services/auto-rickshaw-branding" replace />} />
             <Route path="/advertising-services/:serviceId" element={<AdvertisingServiceDetail />} />
+            <Route path="/event-services" element={<Navigate to="/event-services/corporate-events" replace />} />
+            <Route path="/event-services/:eventId" element={<EventDetails />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/awards" element={<AwardsLanding />} />
             <Route path="/awards/:categorySlug" element={<AwardsLanding />} />
@@ -87,6 +91,7 @@ function App() {
               <Route path="blogs/:id/edit" element={<AdminWriteBlog />} />
               <Route path="gallery" element={<AdminGallery />} />
               <Route path="settings" element={<AdminSettings />} />
+              <Route path="nomination-settings" element={<AdminNominationSettings />} />
               {/* Add more nested admin routes here later */}
             </Route>
           </Routes>

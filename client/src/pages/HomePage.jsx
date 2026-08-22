@@ -7,6 +7,7 @@ import HomeFaqSection from '../components/home/HomeFaqSection';
 import ServicesGrid from '../components/home/ServicesGrid';
 import AdvertisingServicesGrid from '../components/home/AdvertisingServicesGrid';
 import AdvertisingServicesMarquee from '../components/home/AdvertisingServicesMarquee';
+import EventServicesGrid from '../components/home/EventServicesGrid';
 import ResearchMethodology from '../components/home/ResearchMethodology';
 import SelectionProcess from '../components/home/SelectionProcess';
 import TestimonialSection from '../components/home/TestimonialSection';
@@ -61,6 +62,7 @@ const HomePage = () => {
         <SectionWrapper><ChiefGuestsCarousel /></SectionWrapper>
         <SectionWrapper><AdvertisingServicesGrid /></SectionWrapper>
         <SectionWrapper><AdvertisingServicesMarquee /></SectionWrapper>
+        <SectionWrapper><EventServicesGrid /></SectionWrapper>
         <SectionWrapper><ServicesGrid /></SectionWrapper>
         <SectionWrapper><ServicesMarquee /></SectionWrapper>
         <SectionWrapper><ResearchMethodology /></SectionWrapper>

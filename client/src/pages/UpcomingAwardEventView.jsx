@@ -6,6 +6,7 @@ import { MapPin, Calendar, Shield, Sparkles, Handshake, Megaphone, User } from '
 import RelatedAwards from '../components/common/RelatedAwards';
 import UpcomingEventsSection from '../components/home/UpcomingEventsSection';
 import ChiefGuestsCarousel from '../components/home/ChiefGuestsCarousel';
+import EventGallery from '../components/home/EventGallery';
 
 const UpcomingAwardEventView = ({ event, categorySlug, relatedEvents }) => {
     const displayYear = event.year || new Date(event.eventDate).getFullYear() || new Date().getFullYear();
@@ -116,7 +117,7 @@ const UpcomingAwardEventView = ({ event, categorySlug, relatedEvents }) => {
                                         <p className="text-white font-bold text-lg leading-tight">{locationString}</p>
                                     </div>
                                 </div>
-                                
+
                                 {event.chiefGuest && (
                                     <div className="flex items-center gap-5">
                                         <div className="w-14 h-14 shrink-0 rounded-2xl border border-[#15b7b9]/30 flex items-center justify-center bg-[#15b7b9]/10 text-[#15b7b9]">
@@ -149,6 +150,7 @@ const UpcomingAwardEventView = ({ event, categorySlug, relatedEvents }) => {
                         </div>
                     </div>
                 </div>
+                <EventGallery />
 
                 {/* Guests Carousel */}
                 <div className="my-20 -mx-4 md:mx-0">

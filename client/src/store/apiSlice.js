@@ -6,7 +6,7 @@ export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: axiosBaseQuery(api),
   keepUnusedDataFor: 3600, // Keep cached data for 1 hour when component unmounts
-  tagTypes: ['Blog', 'Comment', 'Nomination', 'Contact', 'AwardCategory', 'AwardEvent', 'Gallery'],
+  tagTypes: ['Blog', 'Comment', 'Nomination', 'Contact', 'AwardCategory', 'AwardEvent', 'Gallery', 'NominationSettings'],
   endpoints: (builder) => ({
     // ---- BLOGS ----
     getBlogs: builder.query({
@@ -131,6 +131,23 @@ export const apiSlice = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['Nomination'],
+    }),
+
+    // ---- NOMINATION SETTINGS ----
+    getNominationSettings: builder.query({
+      query: () => ({
+        url: '/nomination-settings',
+        method: 'GET',
+      }),
+      providesTags: ['NominationSettings'],
+    }),
+    updateNominationSettings: builder.mutation({
+      query: (data) => ({
+        url: '/nomination-settings',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['NominationSettings'],
     }),
 
     // ---- CONTACT ----
@@ -271,6 +288,9 @@ export const {
   useSubmitContactFormMutation,
   useUpdateContactStatusMutation,
   useDeleteContactMutation,
+
+  useGetNominationSettingsQuery,
+  useUpdateNominationSettingsMutation,
   
   useGetAwardCategoriesQuery,
   useCreateAwardCategoryMutation,

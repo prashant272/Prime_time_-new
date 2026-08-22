@@ -35,6 +35,7 @@ const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Nominations', path: '/admin/nominations', icon: Trophy },
+    { name: 'Nomination Form', path: '/admin/nomination-settings', icon: Settings },
     { name: 'Inquiries', path: '/admin/contact', icon: MessageSquare },
     { name: 'Award Categories', path: '/admin/award-categories', icon: Tag },
     { name: 'Award Events', path: '/admin/award-events', icon: Award },
