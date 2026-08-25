@@ -7,6 +7,7 @@ import { MapPin, Calendar, ChevronRight, X, User } from 'lucide-react';
 import UpcomingAwardEventView from './UpcomingAwardEventView';
 import RelatedAwards from '../components/common/RelatedAwards';
 import UpcomingEventsSection from '../components/home/UpcomingEventsSection';
+import EventGallery from '../components/home/EventGallery';
 
 const AwardEventPage = () => {
   const { eventSlug, categorySlug } = useParams();
@@ -209,6 +210,7 @@ const AwardEventPage = () => {
             </div>
           </section>
         )}
+        <EventGallery />
 
         {/* Section 4: Related Awards */}
         <RelatedAwards relatedEvents={relatedEvents} categorySlug={categorySlug} />

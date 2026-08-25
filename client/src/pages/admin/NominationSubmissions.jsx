@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Award, Trash2, Loader2, Search, Download, Eye, Edit2 } from 'lucide-react';
+import { Award, Trash2, Loader2, Search, Download, Eye, Edit2, Filter } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useGetNominationsQuery, useUpdateNominationStatusMutation, useUpdateNominationPaymentMutation, useDeleteNominationMutation, useUpdateNominationMutation } from '../../store/apiSlice';
 import NominationViewModal from '../../components/admin/NominationViewModal';
 import NominationEditModal from '../../components/admin/NominationEditModal';
 import config from '../../config/env';
+import categoryMap from '../../data/categoryMap';
 
 const STATUS_OPTIONS = [
   'ALL STATUSES',
@@ -31,7 +32,11 @@ export default function NominationSubmissions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL STATUSES');
   const [paymentFilter, setPaymentFilter] = useState('ALL PAYMENTS');
-  const [awardFilter, setAwardFilter] = useState('ALL AWARDS');
+  
+  // Hierarchical filters
+  const [awardNameFilter, setAwardNameFilter] = useState('ALL AWARDS');
+  const [editionFilter, setEditionFilter] = useState('ALL EDITIONS');
+
   const [updatingId, setUpdatingId] = useState(null);
 
   // Modal states
@@ -46,7 +51,8 @@ export default function NominationSubmissions() {
     search: searchTerm,
     status: statusFilter !== 'ALL STATUSES' ? statusFilter : undefined,
     paymentStatus: paymentFilter !== 'ALL PAYMENTS' ? paymentFilter : undefined,
-    awardName: awardFilter !== 'ALL AWARDS' ? awardFilter : undefined
+    awardName: awardNameFilter !== 'ALL AWARDS' ? awardNameFilter : undefined,
+    edition: editionFilter !== 'ALL EDITIONS' ? editionFilter : undefined
   };
 
   const { data: response, isLoading, error } = useGetNominationsQuery(queryParams);
@@ -129,7 +135,8 @@ export default function NominationSubmissions() {
             <tr className="sticky top-0 z-40 shadow-sm">
               {[
                 { label: "Participation", width: "220px" },
-                { label: "Category", width: "220px" },
+                { label: "Award Event", width: "240px" },
+                { label: "Category Details", width: "320px" },
                 { label: "Nominee Entity", width: "240px" },
                 { label: "Workflow Status", width: "200px" },
                 { label: "Revenue Status", width: "180px" },
@@ -159,10 +166,45 @@ export default function NominationSubmissions() {
                     <span className="whitespace-normal leading-tight max-w-[160px]">{n.wantTo}</span>
                   </div>
                 </td>
-                <td className="p-5 align-top">
-                  <div className="space-y-1.5">
-                    <div className="text-base font-black text-slate-900 leading-snug">{n.awardName}</div>
-                    <div className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-slate-100 inline-block px-2 py-0.5 rounded-md">{n.registrationType}</div>
+                <td className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase tracking-wider rounded-lg border border-violet-100 w-fit">
+                      <Award size={12} />
+                      {n.awardName || 'N/A'}
+                    </span>
+                    {n.edition && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {Array.isArray(n.edition) ? (
+                          n.edition.map((ed, idx) => (
+                            <span key={idx} className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">
+                              {ed}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wider">
+                            {n.edition}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-5 py-4 border-b border-slate-100">
+                  <div className="flex flex-col gap-1.5">
+                    {n.categoryPath && n.categoryPath.length > 0 ? (
+                      <>
+                        <span className="text-xs font-bold text-sky-700 leading-tight">
+                          {n.categoryPath[n.categoryPath.length - 1]}
+                        </span>
+                        {n.categoryPath.length > 1 && (
+                          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 px-2 py-0.5 rounded border border-slate-100 w-fit">
+                            {n.categoryPath.slice(0, -1).join(' > ')}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-xs font-medium text-slate-400 italic">No category</span>
+                    )}
                   </div>
                 </td>
                 <td className="p-5 align-top">
@@ -391,29 +433,39 @@ export default function NominationSubmissions() {
       </div>
 
       {/* Filters & Search */}
-      <div className="mt-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
+      <div className="mt-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4 items-center">
+        
+        {/* Search Bar */}
+        <div className="w-full lg:flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input
             type="text"
             placeholder="Search across all fields..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-base font-medium text-slate-700 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-medium text-slate-700 placeholder:text-slate-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="w-full md:w-64">
+
+        {/* Award Filter */}
+        <div className="w-full lg:w-48 flex-shrink-0">
           <select
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-bold uppercase tracking-widest text-slate-700 cursor-pointer"
-            value={awardFilter}
-            onChange={(e) => setAwardFilter(e.target.value)}
+            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm font-bold uppercase tracking-widest text-slate-700 cursor-pointer shadow-sm"
+            value={awardNameFilter}
+            onChange={(e) => {
+              setAwardNameFilter(e.target.value);
+              setEditionFilter('ALL EDITIONS');
+            }}
           >
-            {AWARD_OPTIONS.map(a => (
+            <option value="ALL AWARDS">All Awards</option>
+            {AWARD_OPTIONS.filter(o => o !== 'ALL AWARDS').map(a => (
               <option key={a} value={a}>{a}</option>
             ))}
           </select>
         </div>
-        <div className="w-full md:w-64">
+
+        {/* Status Filter */}
+        <div className="w-full lg:w-40 flex-shrink-0">
           <select
             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-bold uppercase tracking-widest text-slate-700 cursor-pointer"
             value={statusFilter}
@@ -424,17 +476,19 @@ export default function NominationSubmissions() {
             ))}
           </select>
         </div>
-        <div className="w-full md:w-48">
+
+        {/* Payment Filter */}
+        <div className="w-full lg:w-44 flex-shrink-0">
           <select
             className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-bold uppercase tracking-widest text-slate-700 cursor-pointer"
             value={paymentFilter}
             onChange={(e) => setPaymentFilter(e.target.value)}
           >
-            <option value="ALL PAYMENTS">ALL PAYMENTS</option>
-            <option value="paid">FULLY PAID</option>
-            <option value="initial_paid">INITIAL PAID</option>
-            <option value="not_paid">NOT PAID</option>
-            <option value="not_interested">NOT INTERESTED</option>
+            <option value="ALL PAYMENTS">All Payments</option>
+            <option value="paid">Fully Paid</option>
+            <option value="initial_paid">Initial Paid</option>
+            <option value="not_paid">Not Paid</option>
+            <option value="not_interested">Not Interested</option>
           </select>
         </div>
       </div>

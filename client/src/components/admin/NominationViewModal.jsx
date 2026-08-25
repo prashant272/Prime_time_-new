@@ -10,6 +10,14 @@ const DetailItem = ({ label, val, color = "text-white/90", isLink }) => {
       <p className="text-[8px] font-black uppercase tracking-widest text-white/40 mb-1">{label}</p>
       {isLink ? (
         <a href={val} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-indigo-400 hover:underline">{val}</a>
+      ) : Array.isArray(val) ? (
+        <div className="flex flex-wrap gap-1 mt-1">
+          {val.map((item, idx) => (
+            <span key={idx} className={`text-[10px] font-bold bg-white/10 px-2 py-1 rounded-md uppercase tracking-wider ${color}`}>
+              {item}
+            </span>
+          ))}
+        </div>
       ) : (
         <p className={`text-xs font-bold ${color}`}>{val}</p>
       )}
@@ -72,7 +80,9 @@ export default function NominationViewModal({ nomination, onClose }) {
                   <span className="p-1.5 bg-[#d4af37]/10 rounded-lg text-xs">🏅</span> Classification
                 </h3>
                 <div className="grid sm:grid-cols-2 gap-5">
-                  <DetailItem label="Category" val={nomination.awardName} />
+                  <DetailItem label="Award Name" val={nomination.awardName} />
+                  <DetailItem label="Edition" val={nomination.edition} />
+                  <DetailItem label="Category Path" val={nomination.categoryPath ? nomination.categoryPath.join(' > ') : 'N/A'} color="text-cyan-400" />
                   <DetailItem label="Registration Type" val={nomination.registrationType} />
                   <DetailItem label="Referred By" val={nomination.referredBy} />
                   <DetailItem label="System Classification" val={nomination.wantTo} color="text-[#d4af37]" />

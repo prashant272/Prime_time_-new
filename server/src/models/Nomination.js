@@ -4,7 +4,15 @@ const nominationSchema = new mongoose.Schema(
   {
     awardName: {
       type: String,
-      required: true,
+      required: [true, 'Award name is required'],
+    },
+    edition: {
+      type: [String],
+      required: [true, 'Edition is required'],
+    },
+    categoryPath: {
+      type: [String],
+      required: [true, 'Category classification is required'],
     },
     wantTo: {
       type: String,

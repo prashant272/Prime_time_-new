@@ -8,6 +8,8 @@ export const submitNomination = async (req, res) => {
   try {
     const {
       awardName,
+      edition,
+      categoryPath,
       wantTo,
       registrationType,
       nomineeName,
@@ -44,6 +46,8 @@ export const submitNomination = async (req, res) => {
 
     const newNomination = await Nomination.create({
       awardName,
+      edition,
+      categoryPath,
       wantTo,
       registrationType,
       nomineeName,
@@ -89,7 +93,7 @@ export const submitNomination = async (req, res) => {
 // @access  Private/Admin
 export const getNominations = async (req, res) => {
   try {
-    const { search, status, paymentStatus, awardName } = req.query;
+    const { status, paymentStatus, search, awardName, edition, categoryPath } = req.query;
     
     // Build query object
     let query = {};
@@ -104,6 +108,15 @@ export const getNominations = async (req, res) => {
 
     if (awardName && awardName !== 'ALL AWARDS') {
       query.awardName = awardName;
+    }
+
+    if (edition && edition !== 'ALL EDITIONS') {
+      query.edition = edition;
+    }
+
+    if (categoryPath && categoryPath !== 'ALL CATEGORIES') {
+      // If filtering by a specific category node, check if it's anywhere in the path
+      query.categoryPath = categoryPath;
     }
 
     if (search) {
