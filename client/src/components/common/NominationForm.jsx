@@ -67,40 +67,33 @@ const NominationForm = () => {
     });
   };
 
-  const getDropdownData = () => {
-    if (!awardName || !categoryMap[awardName]) return [];
-    
-    let currentNode = categoryMap[awardName];
-    const dropdowns = [];
-    
-    // Level 0
-    dropdowns.push({
-      options: Array.isArray(currentNode) ? currentNode : Object.keys(currentNode),
-      selectedValue: categoryPath[0] || '',
-      levelIndex: 0
-    });
-
-    // Deeper levels
-    for (let i = 0; i < categoryPath.length; i++) {
-      const selectedKey = categoryPath[i];
-      if (!selectedKey) break;
-
-      if (!Array.isArray(currentNode) && currentNode[selectedKey]) {
-        currentNode = currentNode[selectedKey];
-        dropdowns.push({
-          options: Array.isArray(currentNode) ? currentNode : Object.keys(currentNode),
-          selectedValue: categoryPath[i + 1] || '',
-          levelIndex: i + 1
-        });
-      } else {
-        break;
-      }
-    }
-
-    return dropdowns;
+  const preSelectedSectors = {
+    'Global Healthcare Awards': 'Healthcare',
+    'Global Education Awards': 'Education',
+    'Digital Bharat Summit': 'Technology & Digital Transformation'
   };
 
-  const dropdownData = getDropdownData();
+  const isPreSelected = !!preSelectedSectors[awardName];
+  const implicitSector = preSelectedSectors[awardName];
+
+  // Data lookups based on state
+  let availableSectors = [];
+  let availableCategories = [];
+  let groupedSubCategories = {};
+
+  if (awardName && !isPreSelected) {
+    availableSectors = Object.keys(categoryMap);
+  }
+
+  const selectedSector = isPreSelected ? implicitSector : categoryPath[0];
+  if (selectedSector && categoryMap[selectedSector]) {
+    availableCategories = Object.keys(categoryMap[selectedSector]);
+  }
+
+  const selectedCategory = isPreSelected ? categoryPath[0] : categoryPath[1];
+  if (selectedSector && selectedCategory && categoryMap[selectedSector][selectedCategory]) {
+    groupedSubCategories = categoryMap[selectedSector][selectedCategory];
+  }
 
   // Watch fields
   const registrationType = watch('registrationType');
@@ -113,7 +106,8 @@ const NominationForm = () => {
       return;
     }
 
-    if (dropdownData.length > 0 && categoryPath.length !== dropdownData.length) {
+    const requiredLength = isPreSelected ? 2 : 3;
+    if (awardName && categoryPath.length !== requiredLength) {
       setSubmitStatus('error');
       setErrorMessage('Please completely fill out the Category selection.');
       return;
@@ -136,7 +130,21 @@ const NominationForm = () => {
       });
 
       // Append category path array
-      categoryPath.forEach(p => {
+      let finalCategoryPath = [...categoryPath];
+      const preSelectedSectors = {
+        'Global Healthcare Awards': 'Healthcare',
+        'Global Education Awards': 'Education',
+        'Digital Bharat Summit': 'Technology & Digital Transformation'
+      };
+      if (preSelectedSectors[awardName]) {
+          finalCategoryPath.unshift(preSelectedSectors[awardName]);
+      }
+
+      if (finalCategoryPath[finalCategoryPath.length - 1] === 'Other' && data.customCategory) {
+          finalCategoryPath[finalCategoryPath.length - 1] = data.customCategory;
+      }
+      
+      finalCategoryPath.forEach(p => {
         formData.append('categoryPath', p);
       });
 
@@ -183,19 +191,7 @@ const NominationForm = () => {
     );
   }
 
-  // Helper labels
-  const getDropdownLabel = (levelIndex, totalLevels) => {
-    if (levelIndex === totalLevels - 1) {
-      return `Select Subcategory *`;
-    }
-    if (levelIndex === 0 && totalLevels === 4) return "Select Sector *";
-    if (levelIndex === 1 && totalLevels === 4) return "Select Segment *";
-    if (levelIndex === 2 && totalLevels === 4) return "Select Subcategory *";
-    
-    if (levelIndex === 0 && totalLevels === 2) return "Select Core Focus Area *";
-
-    return `Select Level ${levelIndex + 1} *`;
-  };
+  // No dynamic labels needed anymore.
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-slate-100">
@@ -240,7 +236,14 @@ const NominationForm = () => {
                   {...register('awardName', { required: 'Please select an award' })}
                 >
                   <option value="">-Please choose an award-</option>
-                  {Object.keys(categoryMap).map((awardKey, idx) => (
+                  {[
+                    'International Awards',
+                    'Global Education Awards',
+                    'Global Healthcare Awards',
+                    'Digital Bharat Summit',
+                    'Global Icon Awards',
+                    'India Excellence Awards'
+                  ].map((awardKey, idx) => (
                     <option key={idx} value={awardKey}>{awardKey}</option>
                   ))}
                 </select>
@@ -273,29 +276,88 @@ const NominationForm = () => {
               </div>
             )}
 
-            {/* Dynamic Category Dropdowns */}
-            {(watch('wantTo') === 'Nominate for Awards' && dropdownData.length > 0) && (
+            {/* Explicit Category Dropdowns */}
+            {(watch('wantTo') === 'Nominate for Awards' && awardName) && (
               <div className="md:col-span-2 grid md:grid-cols-2 lg:grid-cols-3 gap-4 bg-sky-50/50 p-5 rounded-xl border border-sky-100 mt-2">
                 <div className="md:col-span-2 lg:col-span-3 pb-2 border-b border-sky-200/50">
                   <h4 className="text-sm font-bold text-sky-800">Select Award Categories</h4>
                   <p className="text-xs text-sky-600/80 mt-1">Please specify the exact category you are nominating for.</p>
                 </div>
-                {dropdownData.map((dd, idx) => (
-                  <div key={idx}>
-                    <label className={labelClass}>{getDropdownLabel(dd.levelIndex, dropdownData.length)}</label>
+                
+                {!isPreSelected && (
+                  <div>
+                    <label className={labelClass}>Select Sector *</label>
                     <select
                       className={inputClass}
-                      value={dd.selectedValue}
-                      onChange={(e) => handleCategoryChange(dd.levelIndex, e.target.value)}
+                      value={categoryPath[0] || ''}
+                      onChange={(e) => handleCategoryChange(0, e.target.value)}
                       required
                     >
-                      <option value="">-Select Option-</option>
-                      {dd.options.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
+                      <option value="">-Select Sector-</option>
+                      {availableSectors.map(opt => (
+                        <option key={opt} value={opt} className="font-normal text-slate-700">{opt}</option>
                       ))}
                     </select>
                   </div>
-                ))}
+                )}
+
+                <div>
+                  <label className={labelClass}>Select Category *</label>
+                  <select
+                    className={inputClass}
+                    value={(isPreSelected ? categoryPath[0] : categoryPath[1]) || ''}
+                    onChange={(e) => handleCategoryChange(isPreSelected ? 0 : 1, e.target.value)}
+                    required
+                    disabled={!selectedSector}
+                  >
+                    <option value="">-Select Category-</option>
+                    {availableCategories.map(opt => (
+                        <option key={opt} value={opt} className="font-normal text-slate-700">{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Select Subcategory *</label>
+                  <select
+                    className={inputClass}
+                    value={(isPreSelected ? categoryPath[1] : categoryPath[2]) || ''}
+                    onChange={(e) => handleCategoryChange(isPreSelected ? 1 : 2, e.target.value)}
+                    required
+                    disabled={!selectedCategory}
+                  >
+                    <option value="">-Select Subcategory-</option>
+                    {Object.entries(groupedSubCategories).map(([group, list]) => (
+                      <optgroup key={group} label={group} className="font-bold text-slate-900 bg-slate-50">
+                        {Array.isArray(list) ? list.map(item => (
+                          <option key={item} value={item} className="font-normal text-slate-700 bg-white">
+                            {item}
+                          </option>
+                        )) : Object.keys(list).map(item => (
+                           <option key={item} value={item} className="font-normal text-slate-700 bg-white">
+                             {item}
+                           </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                    {selectedCategory && (
+                      <option value="Other" className="font-bold text-sky-700 italic bg-white">Other Category...</option>
+                    )}
+                  </select>
+                </div>
+                
+                {(isPreSelected ? categoryPath[1] : categoryPath[2]) === 'Other' && (
+                  <div className="md:col-span-2 lg:col-span-3 mt-2">
+                    <label className={labelClass}>Custom Category Details *</label>
+                    <input
+                      type="text"
+                      className={`${inputClass} border-sky-300 ring-sky-100 bg-sky-50`}
+                      placeholder="Type your suggested category title here"
+                      {...register('customCategory', { required: 'Please specify your custom category' })}
+                    />
+                    {errors.customCategory && <p className={errorClass}>{errors.customCategory.message}</p>}
+                  </div>
+                )}
               </div>
             )}
           </div>

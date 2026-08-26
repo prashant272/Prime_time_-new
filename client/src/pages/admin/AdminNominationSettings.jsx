@@ -8,8 +8,7 @@ const STATIC_AWARDS = [
   'Global Healthcare Awards',
   'Digital Bharat Summit',
   'Global Icon Awards',
-  'India Excellence Awards',
-  'National Dental Awards'
+  'India Excellence Awards'
 ];
 
 const AdminNominationSettings = () => {
