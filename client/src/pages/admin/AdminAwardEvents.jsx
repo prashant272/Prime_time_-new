@@ -339,7 +339,13 @@ const AdminAwardEvents = () => {
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+          disabled={selectedCategory === 'upcoming-award'}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors ${
+            selectedCategory === 'upcoming-award' 
+            ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+          title={selectedCategory === 'upcoming-award' ? "Cannot create events directly in the Upcoming view." : ""}
         >
           <Plus size={20} /> Add New Event
         </button>
