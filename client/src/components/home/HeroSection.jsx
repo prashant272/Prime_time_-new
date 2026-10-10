@@ -20,40 +20,74 @@ const SLIDE_INTERVAL_MS = 3000;
 
 const UPCOMING_EVENTS = [
   {
-    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-education-awards-2026-delhi-edition',
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-icon-award-2026-washington-dc-edition',
+    title: 'Global Icon Award 2026',
+    date: '18 November 2026',
+    venue: 'Washington,DC,USA',
+    image: './home/hero/GlobalIcon.jpeg',
+  },
+  {
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-education-awards-2026-washington-dc-edition',
     title: 'Global Education Awards 2026',
-    date: '12 December 2026',
-    venue: 'New Delhi, India',
-    image: './home/hero/GEAdelhi1.jpeg',
+    date: '18 November 2026',
+    venue: 'Washington,DC,USA',
+    image: './home/hero/GlobalEducation.jpeg',
+  },
+  {
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-healthcare-awards-2026-washington-dc-edition',
+    title: 'Global Healthcare Awards 2026',
+    date: '18 November 2026',
+    venue: 'Washington,DC,USA',
+    image: './home/hero/GlobalHealthcare.jpeg',
   },
   {
     slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-icon-award-2026-delhi-edition',
     title: 'Global Icon Award 2026',
     date: '12 December 2026',
     venue: 'Delhi,India',
-    image: './home/hero/GIAdelhi1.jpeg',
+    image: './home/hero/GlobalIcon.jpeg',
   },
   {
-    slug: 'https://www.primetimemedia.in/awards/global-education-awards/global-education-awards-2026-dubai-edition',
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-education-awards-2026-delhi-edition',
     title: 'Global Education Awards 2026',
-    date: '31 October 2026',
-    venue: 'Dubai,UAE',
-    image: './home/hero/globaleducatiodubai.jpeg',
+    date: '12 December 2026',
+    venue: 'New Delhi, India',
+    image: './home/hero/GlobalEducation.jpeg',
   },
   {
-    slug: 'https://www.primetimemedia.in/awards/global-healthcare-awards/global-healthcare-awards-2026-delhi-edition',
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-healthcare-awards-2026-delhi-edition',
     title: 'Global Healthcare Awards 2026',
     date: '12 December 2026',
     venue: 'Delhi,India',
-    image: './home/hero/GHADelhi1.jpeg',
+    image: './home/hero/GlobalHealthcare.jpeg',
   },
   {
-    slug: 'https://www.primetimemedia.in/awards/global-healthcare-awards/global-healthcare-awards-2026-washington-dc-edition',
-    title: 'Global Healthcare Awards 2026',
-    date: '31 October 2026',
-    venue: 'Washington DC,USA',
-    image: './home/hero/globalhealthcarewashington.jpeg',
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-icon-award-2026-dubai-edition',
+    title: 'Global Icon Award 2026',
+    date: '6 December 2026',
+    venue: 'Dubai,UAE',
+    image: './home/hero/GlobalIcon.jpeg',
   },
+  {
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-education-awards-2026-dubai-edition',
+    title: 'Global Education Awards 2026',
+    date: '6 December 2026',
+    venue: 'Dubai,UAE',
+    image: './home/hero/GlobalEducation.jpeg',
+  },
+  {
+    slug: 'https://www.primetimemedia.in/awards/upcoming-award/global-healthcare-awards-2026-dubai-edition',
+    title: 'Global Healthcare Awards 2026',
+    date: '6 December 2026',
+    venue: 'Dubai,UAE',
+    image: './home/hero/GlobalHealthcare.jpeg',
+  },
+
+
+
+
+
+
 
 ];
 

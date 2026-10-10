@@ -69,6 +69,14 @@ export default function NominationViewModal({ nomination, onClose }) {
                 <p className="text-[8px] font-black uppercase tracking-widest text-cyan-400/60 mb-1">Participation</p>
                 <p className="text-xs font-black uppercase tracking-widest text-cyan-400">{nomination.wantTo}</p>
               </div>
+              {nomination.assignedTo && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-xl">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-emerald-400/60 mb-1">Assigned Team Member</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-emerald-400">
+                    {nomination.assignedTo.name || nomination.assignedTo}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

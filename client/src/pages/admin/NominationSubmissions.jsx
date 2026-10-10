@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { Award, Trash2, Loader2, Search, Download, Eye, Edit2, Filter } from 'lucide-react';
+import { Award, Trash2, Loader2, Search, Download, Eye, Edit2, Filter, UserCheck, Users } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import { useGetNominationsQuery, useUpdateNominationStatusMutation, useUpdateNominationPaymentMutation, useDeleteNominationMutation, useUpdateNominationMutation } from '../../store/apiSlice';
+import { 
+  useGetNominationsQuery, 
+  useUpdateNominationStatusMutation, 
+  useUpdateNominationPaymentMutation, 
+  useDeleteNominationMutation, 
+  useUpdateNominationMutation,
+  useGetAssignableStaffQuery,
+  useAssignNominationMutation
+} from '../../store/apiSlice';
 import NominationViewModal from '../../components/admin/NominationViewModal';
 import NominationEditModal from '../../components/admin/NominationEditModal';
 import config from '../../config/env';
@@ -29,15 +37,19 @@ const AWARD_OPTIONS = [
 
 export default function NominationSubmissions() {
   const { adminInfo } = useSelector((state) => state.auth);
+  const isSuperAdmin = adminInfo?.role === 'admin' || adminInfo?.role === 'superadmin' || !adminInfo?.role;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL STATUSES');
   const [paymentFilter, setPaymentFilter] = useState('ALL PAYMENTS');
+  const [assignedToFilter, setAssignedToFilter] = useState('ALL ASSIGNEES');
   
   // Hierarchical filters
   const [awardNameFilter, setAwardNameFilter] = useState('ALL AWARDS');
   const [editionFilter, setEditionFilter] = useState('ALL EDITIONS');
 
   const [updatingId, setUpdatingId] = useState(null);
+  const [assigningId, setAssigningId] = useState(null);
 
   // Modal states
   const [viewingNomination, setViewingNomination] = useState(null);
@@ -47,12 +59,17 @@ export default function NominationSubmissions() {
   const [editingRemarkId, setEditingRemarkId] = useState(null);
   const [remarkText, setRemarkText] = useState('');
 
+  // Fetch assignable staff for assignment dropdown (superadmin only)
+  const { data: staffResponse } = useGetAssignableStaffQuery(undefined, { skip: !isSuperAdmin });
+  const assignableStaff = (staffResponse?.data || []).filter((s) => s.role === 'staff');
+
   const queryParams = {
     search: searchTerm,
     status: statusFilter !== 'ALL STATUSES' ? statusFilter : undefined,
     paymentStatus: paymentFilter !== 'ALL PAYMENTS' ? paymentFilter : undefined,
     awardName: awardNameFilter !== 'ALL AWARDS' ? awardNameFilter : undefined,
-    edition: editionFilter !== 'ALL EDITIONS' ? editionFilter : undefined
+    edition: editionFilter !== 'ALL EDITIONS' ? editionFilter : undefined,
+    assignedTo: isSuperAdmin && assignedToFilter !== 'ALL ASSIGNEES' ? assignedToFilter : undefined
   };
 
   const { data: response, isLoading, error } = useGetNominationsQuery(queryParams);
@@ -60,6 +77,7 @@ export default function NominationSubmissions() {
   const [updatePayment] = useUpdateNominationPaymentMutation();
   const [deleteNom] = useDeleteNominationMutation();
   const [updateNomination] = useUpdateNominationMutation();
+  const [assignNomination] = useAssignNominationMutation();
 
   const nominations = response?.data || [];
 
@@ -130,10 +148,11 @@ export default function NominationSubmissions() {
   const renderNominationsTable = () => (
     <div className="relative group/table mt-6">
       <div className="overflow-x-auto max-h-[75vh] rounded-2xl border border-slate-200 bg-white shadow-lg overflow-y-auto custom-scrollbar">
-        <table className="min-w-[1700px] w-full text-left border-separate border-spacing-0">
+        <table className="min-w-[1920px] w-full text-left border-separate border-spacing-0">
           <thead>
             <tr className="sticky top-0 z-40 shadow-sm">
               {[
+                { label: "Assign To", width: "210px" },
                 { label: "Participation", width: "220px" },
                 { label: "Award Event", width: "240px" },
                 { label: "Category Details", width: "320px" },
@@ -160,6 +179,63 @@ export default function NominationSubmissions() {
           <tbody className="divide-y divide-slate-100">
             {nominations.map((n) => (
               <tr key={n._id} className="hover:bg-slate-50/80 transition-colors duration-200 group/row">
+                {/* 1. ASSIGN TO COLUMN (FIRST COLUMN) */}
+                <td className="p-5 align-top border-b border-slate-100">
+                  {isSuperAdmin ? (
+                    <div className="space-y-1.5 min-w-[190px]">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                          <Users size={12} className="text-sky-500" />
+                          {n.assignedTo?.name ? 'Assigned' : 'Unassigned'}
+                        </span>
+                        {assigningId === n._id && (
+                          <Loader2 size={12} className="animate-spin text-sky-500" />
+                        )}
+                      </div>
+                      <select
+                        value={n.assignedTo?._id || n.assignedTo || ''}
+                        onChange={async (e) => {
+                          const newAssignee = e.target.value;
+                          try {
+                            setAssigningId(n._id);
+                            await assignNomination({ id: n._id, assignedTo: newAssignee || null }).unwrap();
+                          } catch (err) {
+                            console.error('Failed to assign nomination:', err);
+                            alert('Failed to assign nomination');
+                          } finally {
+                            setAssigningId(null);
+                          }
+                        }}
+                        disabled={assigningId === n._id}
+                        className={`w-full text-xs font-bold rounded-lg px-2.5 py-2 border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-200 ${
+                          n.assignedTo
+                            ? 'bg-sky-50 text-sky-800 border-sky-200 hover:bg-sky-100/80'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-white'
+                        }`}
+                      >
+                        <option value="">-- Unassigned --</option>
+                        {assignableStaff.map((staff) => (
+                          <option key={staff._id} value={staff._id}>
+                            {staff.name}
+                          </option>
+                        ))}
+                      </select>
+                      {n.assignedTo?.email && (
+                        <div className="text-[10px] text-slate-400 font-medium truncate max-w-[180px] px-0.5">
+                          {n.assignedTo.email}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="min-w-[180px] pt-1">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-emerald-50 border-emerald-200 text-emerald-800 text-[11px] font-bold shadow-sm">
+                        <UserCheck size={14} className="text-emerald-600" />
+                        Assigned to You
+                      </span>
+                    </div>
+                  )}
+                </td>
+
                 <td className="p-5 align-top">
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-sky-50 border-sky-100 text-sky-700 text-[11px] font-black uppercase tracking-widest shadow-sm">
                     <span className="text-lg">{n.wantTo?.includes('Nominate') ? '🏆' : n.wantTo?.includes('Speak') ? '🎤' : n.wantTo?.includes('Exhibit') ? '🏢' : '💎'}</span>
@@ -491,6 +567,25 @@ export default function NominationSubmissions() {
             <option value="not_interested">Not Interested</option>
           </select>
         </div>
+
+        {/* Assignee Filter (Super Admin Only) */}
+        {isSuperAdmin && (
+          <div className="w-full lg:w-48 flex-shrink-0">
+            <select
+              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 text-sm font-bold uppercase tracking-widest text-slate-700 cursor-pointer"
+              value={assignedToFilter}
+              onChange={(e) => setAssignedToFilter(e.target.value)}
+            >
+              <option value="ALL ASSIGNEES">All Assignees</option>
+              <option value="unassigned">Unassigned Only</option>
+              {assignableStaff.map((staff) => (
+                <option key={staff._id} value={staff._id}>
+                  {staff.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {error && (

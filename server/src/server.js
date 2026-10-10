@@ -12,6 +12,8 @@ import blogRoutes from './routes/blog.routes.js';
 import awardRoutes from './routes/award.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
 import nominationSettingsRoutes from './routes/nominationSettings.routes.js';
+import userRoutes from './routes/user.routes.js';
+import questionnaireNominationRoutes from './routes/questionnaireNomination.routes.js';
 
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Render load balancer)
@@ -73,6 +75,8 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/awards', awardRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/nomination-settings', nominationSettingsRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/questionnaire-nominations', questionnaireNominationRoutes);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });

@@ -1,14 +1,32 @@
 import ContactMessage from '../models/ContactMessage.js';
+import { verifyTurnstileToken } from '../services/turnstile.service.js';
 
 // @desc    Submit a new contact message
 // @route   POST /api/contact/submit
 // @access  Public
 export const submitContactMessage = async (req, res) => {
   try {
-    const { name, organization, email, phone, message } = req.body;
+    const { name, organization, email, phone, message, captchaToken, _hp_website } = req.body;
 
+    // 1. Honeypot check: bots auto-fill hidden inputs
+    if (_hp_website) {
+      return res.status(200).json({ success: true, message: 'Message sent successfully' });
+    }
+
+    // 2. Basic field validation
     if (!name || !email || !message) {
       return res.status(400).json({ message: 'Name, email, and message are required' });
+    }
+
+    // 3. CAPTCHA verification
+    const remoteIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress;
+    const captchaResult = await verifyTurnstileToken(captchaToken, remoteIp);
+
+    if (!captchaResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Security check failed. Please verify the CAPTCHA and try again.',
+      });
     }
 
     const newMessage = await ContactMessage.create({

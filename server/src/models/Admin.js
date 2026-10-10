@@ -20,6 +20,28 @@ const adminSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    role: {
+      type: String,
+      enum: ["admin", "staff"],
+      default: "admin",
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+    permissions: {
+      dashboard: { type: Boolean, default: true },
+      nominations: { type: Boolean, default: true },
+      nominationSettings: { type: Boolean, default: false },
+      inquiries: { type: Boolean, default: false },
+      awardCategories: { type: Boolean, default: false },
+      awardEvents: { type: Boolean, default: false },
+      blogs: { type: Boolean, default: false },
+      gallery: { type: Boolean, default: false },
+      settings: { type: Boolean, default: false },
+      questionnaireNominations: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );

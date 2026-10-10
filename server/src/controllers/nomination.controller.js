@@ -70,6 +70,7 @@ export const submitNomination = async (req, res) => {
       message,
       termsAccepted: true,
       fileUrl,
+      user: req.user?._id || null,
     });
 
     // Send confirmation email if contactEmail is provided
@@ -93,10 +94,23 @@ export const submitNomination = async (req, res) => {
 // @access  Private/Admin
 export const getNominations = async (req, res) => {
   try {
-    const { status, paymentStatus, search, awardName, edition, categoryPath } = req.query;
+    const { status, paymentStatus, search, awardName, edition, categoryPath, assignedTo } = req.query;
     
     // Build query object
     let query = {};
+
+    // Role-based scope isolation:
+    // If user is staff (not admin/superadmin), strictly scope to their assigned nominations only!
+    const isSuperAdmin = req.admin?.role === "admin" || req.admin?.role === "superadmin";
+    if (!isSuperAdmin) {
+      query.assignedTo = req.admin._id;
+    } else if (assignedTo) {
+      if (assignedTo === "unassigned") {
+        query.assignedTo = null;
+      } else if (assignedTo !== "ALL ASSIGNEES" && assignedTo !== "all") {
+        query.assignedTo = assignedTo;
+      }
+    }
 
     if (status && status !== 'ALL STATUSES') {
       query.status = status;
@@ -140,9 +154,37 @@ export const getNominations = async (req, res) => {
       ];
     }
 
-    const nominations = await Nomination.find(query).sort({ createdAt: -1 });
+    const nominations = await Nomination.find(query)
+      .populate('assignedTo', '_id name email role')
+      .sort({ createdAt: -1 });
+
     res.status(200).json({ success: true, count: nominations.length, data: nominations });
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Assign nomination to staff
+// @route   PATCH /api/admin/nominations/:id/assign
+// @access  Private/Admin
+export const assignNomination = async (req, res) => {
+  try {
+    const { assignedTo } = req.body;
+    const nomination = await Nomination.findById(req.params.id);
+
+    if (!nomination) {
+      return res.status(404).json({ message: 'Nomination not found' });
+    }
+
+    nomination.assignedTo = assignedTo ? assignedTo : null;
+    await nomination.save();
+
+    const updated = await Nomination.findById(nomination._id)
+      .populate('assignedTo', '_id name email role');
+
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    console.error("Assign nomination error:", error);
     res.status(500).json({ message: error.message });
   }
 };

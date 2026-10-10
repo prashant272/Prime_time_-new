@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Loader2, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { Loader2, Upload, CheckCircle2, AlertCircle, User, Sparkles } from 'lucide-react';
 import { useSubmitNominationMutation, useGetNominationSettingsQuery } from '../../store/apiSlice';
 import categoryMap from '../../data/categoryMap';
 
@@ -25,6 +27,8 @@ const REFERRED_BY_OPTIONS = [
 ];
 
 const NominationForm = () => {
+  const { userInfo } = useSelector((state) => state.auth);
+
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     defaultValues: {
       registrationType: 'organisation',
@@ -42,10 +46,18 @@ const NominationForm = () => {
   const awardName = watch('awardName');
   const [categoryPath, setCategoryPath] = useState([]);
   const [selectedEditions, setSelectedEditions] = useState([]);
+  const [prevAwardName, setPrevAwardName] = useState(awardName);
+
+  // Synchronously reset category selections if awardName changes during render
+  if (awardName !== prevAwardName) {
+    setPrevAwardName(awardName);
+    setSelectedEditions([]);
+    setCategoryPath([]);
+  }
 
   const toggleEdition = (edition) => {
-    setSelectedEditions(prev => 
-      prev.includes(edition) 
+    setSelectedEditions(prev =>
+      prev.includes(edition)
         ? prev.filter(e => e !== edition)
         : [...prev, edition]
     );
@@ -56,6 +68,30 @@ const NominationForm = () => {
     setSelectedEditions([]);
     setCategoryPath([]);
   }, [awardName]);
+
+  // Auto-fill form fields if user is logged in
+  useEffect(() => {
+    if (userInfo) {
+      if (userInfo.name) {
+        setValue('nomineeName', userInfo.name);
+        setValue('contactName', userInfo.name);
+      }
+      if (userInfo.email) {
+        setValue('contactEmail', userInfo.email);
+        setValue('headEmail', userInfo.email);
+      }
+      if (userInfo.phone) {
+        setValue('contactMobile', userInfo.phone);
+        setValue('headMobile', userInfo.phone);
+      }
+      if (userInfo.organization) {
+        setValue('organizationName', userInfo.organization);
+      }
+      if (userInfo.designation) {
+        setValue('contactDesignation', userInfo.designation);
+      }
+    }
+  }, [userInfo, setValue]);
 
   const handleCategoryChange = (levelIndex, val) => {
     setCategoryPath(prev => {
@@ -82,17 +118,17 @@ const NominationForm = () => {
   let groupedSubCategories = {};
 
   if (awardName && !isPreSelected) {
-    availableSectors = Object.keys(categoryMap);
+    availableSectors = Object.keys(categoryMap || {});
   }
 
   const selectedSector = isPreSelected ? implicitSector : categoryPath[0];
-  if (selectedSector && categoryMap[selectedSector]) {
-    availableCategories = Object.keys(categoryMap[selectedSector]);
+  if (selectedSector && categoryMap?.[selectedSector]) {
+    availableCategories = Object.keys(categoryMap[selectedSector] || {});
   }
 
   const selectedCategory = isPreSelected ? categoryPath[0] : categoryPath[1];
-  if (selectedSector && selectedCategory && categoryMap[selectedSector][selectedCategory]) {
-    groupedSubCategories = categoryMap[selectedSector][selectedCategory];
+  if (selectedSector && selectedCategory && categoryMap?.[selectedSector]?.[selectedCategory]) {
+    groupedSubCategories = categoryMap[selectedSector][selectedCategory] || {};
   }
 
   // Watch fields
@@ -137,13 +173,13 @@ const NominationForm = () => {
         'Digital Bharat Summit': 'Technology & Digital Transformation'
       };
       if (preSelectedSectors[awardName]) {
-          finalCategoryPath.unshift(preSelectedSectors[awardName]);
+        finalCategoryPath.unshift(preSelectedSectors[awardName]);
       }
 
       if (finalCategoryPath[finalCategoryPath.length - 1] === 'Other' && data.customCategory) {
-          finalCategoryPath[finalCategoryPath.length - 1] = data.customCategory;
+        finalCategoryPath[finalCategoryPath.length - 1] = data.customCategory;
       }
-      
+
       finalCategoryPath.forEach(p => {
         formData.append('categoryPath', p);
       });
@@ -202,8 +238,52 @@ const NominationForm = () => {
         </div>
       )}
 
+      {/* Account Connection Banner */}
+      {userInfo ? (
+        <div className="bg-sky-50/80 border border-sky-100 rounded-2xl p-4 mb-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#15b7b9] text-white flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
+              {(userInfo?.name?.trim()?.charAt(0) || userInfo?.email?.charAt(0) || 'U').toUpperCase()}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-800">
+                Submitting as <span className="text-[#15b7b9] font-black">{userInfo?.name || userInfo?.email || 'User'}</span> ({userInfo?.email})
+              </p>
+              <p className="text-[11px] text-slate-500">
+                This nomination will be linked to your account and trackable in your dashboard.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/profile?tab=nominations"
+            className="text-xs font-bold text-[#15b7b9] hover:underline whitespace-nowrap hidden sm:inline-block"
+          >
+            View My Dashboard ›
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-4 mb-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center flex-shrink-0">
+              <User size={16} />
+            </div>
+            <p className="text-xs text-slate-600 font-medium">
+              Want to track this submission live?{' '}
+              <Link to="/login?redirect=/nomination" className="font-bold text-[#15b7b9] hover:underline">
+                Sign In
+              </Link>{' '}
+              or{' '}
+              <Link to="/register?redirect=/nomination" className="font-bold text-[#15b7b9] hover:underline">
+                Create an Account
+              </Link>{' '}
+              first.
+            </p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        
+
         {/* I Want To Selection */}
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm">
           <label className={`${labelClass} text-lg mb-3`}>I Want To *</label>
@@ -257,8 +337,8 @@ const NominationForm = () => {
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
                   {Array.from(new Set(settings?.categories?.filter(c => c.categoryName === awardName)?.flatMap(c => c.awards) || [])).map((award, idx) => (
                     <label key={idx} className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${selectedEditions.includes(award) ? 'border-sky-500 bg-sky-50' : 'border-slate-100 hover:border-slate-300'}`}>
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="mt-1 w-4 h-4 text-sky-600 focus:ring-sky-500 rounded flex-shrink-0"
                         checked={selectedEditions.includes(award)}
                         onChange={() => toggleEdition(award)}
@@ -283,7 +363,7 @@ const NominationForm = () => {
                   <h4 className="text-sm font-bold text-sky-800">Select Award Categories</h4>
                   <p className="text-xs text-sky-600/80 mt-1">Please specify the exact category you are nominating for.</p>
                 </div>
-                
+
                 {!isPreSelected && (
                   <div>
                     <label className={labelClass}>Select Sector *</label>
@@ -312,7 +392,7 @@ const NominationForm = () => {
                   >
                     <option value="">-Select Category-</option>
                     {availableCategories.map(opt => (
-                        <option key={opt} value={opt} className="font-normal text-slate-700">{opt}</option>
+                      <option key={opt} value={opt} className="font-normal text-slate-700">{opt}</option>
                     ))}
                   </select>
                 </div>
@@ -334,9 +414,9 @@ const NominationForm = () => {
                             {item}
                           </option>
                         )) : Object.keys(list).map(item => (
-                           <option key={item} value={item} className="font-normal text-slate-700 bg-white">
-                             {item}
-                           </option>
+                          <option key={item} value={item} className="font-normal text-slate-700 bg-white">
+                            {item}
+                          </option>
                         ))}
                       </optgroup>
                     ))}
@@ -345,7 +425,7 @@ const NominationForm = () => {
                     )}
                   </select>
                 </div>
-                
+
                 {(isPreSelected ? categoryPath[1] : categoryPath[2]) === 'Other' && (
                   <div className="md:col-span-2 lg:col-span-3 mt-2">
                     <label className={labelClass}>Custom Category Details *</label>
@@ -421,7 +501,7 @@ const NominationForm = () => {
         {/* Section: Head Details */}
         <div className="bg-slate-50/70 p-6 md:p-8 rounded-2xl border border-slate-100 space-y-6">
           <h3 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-2">3. Head of Organization Details</h3>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className={labelClass}>Head Name *</label>
@@ -451,7 +531,7 @@ const NominationForm = () => {
                 type="email"
                 placeholder="Enter head email"
                 className={`${inputClass} ${errors.headEmail ? 'border-red-500' : ''}`}
-                {...register('headEmail', { 
+                {...register('headEmail', {
                   required: 'Head email is required',
                   pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
                 })}
@@ -475,7 +555,7 @@ const NominationForm = () => {
         {/* Section: Contact Person Details */}
         <div className="bg-slate-50/70 p-6 md:p-8 rounded-2xl border border-slate-100 space-y-6">
           <h3 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-2">4. Primary Contact Person Details</h3>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className={labelClass}>Contact Person Name *</label>
@@ -516,7 +596,7 @@ const NominationForm = () => {
                 type="email"
                 placeholder="Enter contact email"
                 className={`${inputClass} ${errors.contactEmail ? 'border-red-500' : ''}`}
-                {...register('contactEmail', { 
+                {...register('contactEmail', {
                   required: 'Contact email is required',
                   pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" }
                 })}
@@ -529,7 +609,7 @@ const NominationForm = () => {
         {/* Section: Additional Details */}
         <div className="bg-slate-50/70 p-6 md:p-8 rounded-2xl border border-slate-100 space-y-6">
           <h3 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-2">5. Additional Details</h3>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <label className={labelClass}>Website/Social Media Link</label>
@@ -552,7 +632,7 @@ const NominationForm = () => {
                 />
               </div>
             )}
-            
+
             <div className="md:col-span-2">
               <label className={labelClass}>Profile/Work File (PDF, DOC, DOCX - Max 5MB)</label>
               <div className="mt-2 flex justify-center rounded-xl border-2 border-dashed border-slate-300 px-6 py-8 hover:border-sky-500 hover:bg-sky-50/50 transition-colors bg-white">
@@ -583,7 +663,7 @@ const NominationForm = () => {
         {/* Section: Address */}
         <div className="bg-slate-50/70 p-6 md:p-8 rounded-2xl border border-slate-100 space-y-6">
           <h3 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-2">6. Address</h3>
-          
+
           <div>
             <label className={labelClass}>Street Address *</label>
             <input

@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer';
 import FloatingChatMenu from './components/common/FloatingChatMenu';
 import ScrollToTop from './components/common/ScrollToTop';
 import ProtectedRoute from './components/admin/ProtectedRoute';
+import UserProtectedRoute from './components/common/UserProtectedRoute';
 
 // Pages with Code Splitting (Lazy Loading)
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -23,6 +24,12 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsConditions = lazy(() => import('./pages/TermsConditions'));
 const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
 
+// User Pages
+const UserLogin = lazy(() => import('./pages/user/UserLogin'));
+const UserRegister = lazy(() => import('./pages/user/UserRegister'));
+const UserProfile = lazy(() => import('./pages/user/UserProfile'));
+const NominationDetails = lazy(() => import('./pages/user/NominationDetails'));
+
 // Admin Pages (Lazy Loading)
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
 const AdminSignup = lazy(() => import('./pages/admin/AdminSignup'));
@@ -37,6 +44,10 @@ const AdminAwardCategories = lazy(() => import('./pages/admin/AdminAwardCategori
 const AdminAwardEvents = lazy(() => import('./pages/admin/AdminAwardEvents'));
 const AdminGallery = lazy(() => import('./pages/admin/AdminGallery'));
 const AdminNominationSettings = lazy(() => import('./pages/admin/AdminNominationSettings'));
+const AdminQuestionnaireNominations = lazy(() => import('./pages/admin/AdminQuestionnaireNominations'));
+
+// Questionnaire Nomination (Isolated Standalone Page)
+const QuestionnaireNominationPage = lazy(() => import('./pages/QuestionnaireNominationPage'));
 
 function App() {
   const location = useLocation();
@@ -68,12 +79,20 @@ function App() {
             <Route path="/awards/:categorySlug" element={<AwardsLanding />} />
             <Route path="/awards/:categorySlug/:eventSlug" element={<AwardEventPage />} />
             <Route path="/nomination" element={<Nomination />} />
+            <Route path="/application" element={<QuestionnaireNominationPage />} />
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:id" element={<BlogDetailsPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
             
+            {/* User Routes */}
+            <Route path="/login" element={<UserLogin />} />
+            <Route path="/register" element={<UserRegister />} />
+            <Route path="/profile" element={<UserProtectedRoute><UserProfile /></UserProtectedRoute>} />
+            <Route path="/my-nominations" element={<Navigate to="/profile?tab=nominations" replace />} />
+            <Route path="/my-nominations/:id" element={<UserProtectedRoute><NominationDetails /></UserProtectedRoute>} />
+
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/signup" element={<AdminSignup />} />
@@ -84,6 +103,7 @@ function App() {
               <Route path="dashboard" element={<AdminDashboard />} />
               <Route path="contact" element={<ContactSubmissions />} />
               <Route path="nominations" element={<NominationSubmissions />} />
+              <Route path="questionnaire-nominations" element={<AdminQuestionnaireNominations />} />
               <Route path="award-categories" element={<AdminAwardCategories />} />
               <Route path="award-events" element={<AdminAwardEvents />} />
               <Route path="blogs" element={<AdminBlogList />} />
@@ -97,8 +117,16 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-      {!location.pathname.startsWith("/admin") && <Footer />}
-      {!location.pathname.startsWith("/admin") && <FloatingChatMenu />}
+      {!location.pathname.startsWith("/admin") && (
+        <div className="print:hidden">
+          <Footer />
+        </div>
+      )}
+      {!location.pathname.startsWith("/admin") && (
+        <div className="print:hidden">
+          <FloatingChatMenu />
+        </div>
+      )}
     </div>
   );
 }

@@ -32,6 +32,7 @@ const config = {
   },
 
   notifyEmailTo: process.env.NOTIFY_EMAIL_TO,
+  turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
 };
 
 export default Object.freeze(config)
